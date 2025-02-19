@@ -115,6 +115,60 @@ jobs:
           echo "score=0" >> $GITHUB_OUTPUT
 
         fi
+        
+    - name: Test Problem4
+
+      id: p4
+
+      run: |
+        if [ ! -d "Problem4" ]; then
+
+          echo "score=0" >> $GITHUB_OUTPUT
+
+          echo "::warning::Problem3目录不存在"
+          exit 0
+
+        fi
+
+        
+        cd Problem4
+
+        if pytest test.py -q; then
+
+          echo "score=20" >> $GITHUB_OUTPUT
+
+        else
+
+          echo "score=0" >> $GITHUB_OUTPUT
+
+        fi
+
+    - name: Test Problem5
+
+      id: p5
+
+      run: |
+        if [ ! -d "Problem5" ]; then
+
+          echo "score=0" >> $GITHUB_OUTPUT
+
+          echo "::warning::Problem3目录不存在"
+          exit 0
+
+        fi
+
+        
+        cd Problem5
+
+        if pytest test.py -q; then
+
+          echo "score=20" >> $GITHUB_OUTPUT
+
+        else
+
+          echo "score=0" >> $GITHUB_OUTPUT
+
+        fi
     
     - name: Show Results
 
@@ -122,6 +176,8 @@ jobs:
         total=$(( ${{ steps.p1.outputs.score }} + 
                  ${{ steps.p2.outputs.score }} +
                  ${{ steps.p3.outputs.score }} +
+                 ${{ steps.p4.outputs.score }} +
+                 ${{ steps.p5.outputs.score }} 
                  ))
         
         echo "================ 评分报告 ================"
@@ -129,6 +185,8 @@ jobs:
         echo "问题1得分: ${{ steps.p1.outputs.score }}/20"
         echo "问题2得分: ${{ steps.p2.outputs.score }}/20"
         echo "问题3得分: ${{ steps.p3.outputs.score }}/20"
+        echo "问题4得分: ${{ steps.p3.outputs.score }}/20"
+        echo "问题5得分: ${{ steps.p3.outputs.score }}/20"
 
         echo ""
         echo "总分: $total/100"
