@@ -42,7 +42,16 @@ jobs:
     
         tested_count=0
     
-        has_errors=0  # 新增错误状态标志
+        has_errors=0
+    
+        # 确保pytest可用
+    
+        if ! command -v pytest &> /dev/null; then
+    
+          echo "::error::pytest未安装，正在自动安装..."
+          pip install pytest
+    
+        fi
     
         for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
     
@@ -54,16 +63,17 @@ jobs:
             
             if [ -f "test.py" ]; then
     
-              # 使用set +e防止测试失败中断流程
-    
               set +e
     
-              python test.py
+              # 使用pytest执行测试并捕获结果
+    
+              pytest test.py -v --tb=short  # 添加详细输出
     
               test_exit=$?
               set -e
     
-              
+              # 根据pytest结果计分
+    
               if [ $test_exit -eq 0 ]; then
     
                 echo "$problem 测试通过 ✅"
@@ -71,7 +81,7 @@ jobs:
               else
     
                 echo "$problem 测试失败 ❌"
-                has_errors=1  # 标记有错误
+                has_errors=1
     
               fi
     
@@ -95,21 +105,4 @@ jobs:
     
         echo "已测试题目数: $tested_count/5"
         echo "总得分: $total_score/100"
-        
-        # 根据错误状态决定最终退出码
-    
-        if [ $has_errors -eq 1 ]; then
-    
-          echo "::warning::存在未通过的测试或错误"
-          exit 0  # 即使有错误也返回成功状态
-    
-        else
-    
-          echo "所有测试完美通过 🎉"
-          exit 0
-    
-        fi
-            echo "总得分: $total_score/100"
-            # 移除 exit 1 强制失败逻辑
-        
-            echo "评分已完成（状态码始终成功）"
+        exit 0
