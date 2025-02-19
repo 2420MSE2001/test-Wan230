@@ -1,49 +1,86 @@
-- name: Run All Tests
+name: Manual Grading
 
-  run: |
-    total_score=0
+on: 
+  workflow_dispatch:  # 手动触发
 
-    tested_count=0
+jobs:
+  autograde:
+    runs-on: ubuntu-latest
 
-    for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
+    
+    steps:
+    - name: Checkout Code
 
-      echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
-      
-      if [ -d "$problem" ]; then
+      uses: actions/checkout@v4
 
-        cd $problem
+    - name: Set up Python
 
-        # 添加防止test.py不存在的保护
+      uses: actions/setup-python@v4
 
-        if [ -f "test.py" ]; then
+      with:
+        python-version: '3.10'
 
-          if python test.py; then
+    # 新增依赖安装步骤 ▼▼▼
 
-            echo "$problem 测试通过 ✅"
-            ((total_score+=20))
-          else
+    - name: Install Dependencies
 
-            echo "$problem 测试失败 ❌"
-          fi
+      run: |
+        if [ -f "requirements.txt" ]; then
+
+          echo "正在安装全局依赖..."
+          pip install -r requirements.txt
 
         else
 
-          echo "::error::缺少测试文件 $problem/test.py"
-          ((total_score+=0))
+          echo "::warning::根目录未找到requirements.txt文件"
         fi
 
-        cd ..
-        ((tested_count++))
-      else
+    - name: Run All Tests
 
-        echo "$problem 目录未找到 ❗"
-      fi
-
-      echo ""
-    done
-
-    echo "已测试题目数: $tested_count/5"
-    echo "总得分: $total_score/100"
-    # 移除 exit 1 强制失败逻辑
-
-    echo "评分已完成（状态码始终成功）"
+      run: |
+        total_score=0
+    
+        tested_count=0
+    
+        for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
+    
+          echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
+          
+          if [ -d "$problem" ]; then
+    
+            cd $problem
+    
+            # 添加防止test.py不存在的保护
+    
+            if [ -f "test.py" ]; then
+    
+              if python test.py; then
+    
+                echo "$problem 测试通过 ✅"
+                ((total_score+=20))
+              else
+    
+                echo "$problem 测试失败 ❌"
+              fi
+    
+            else
+    
+              echo "::error::缺少测试文件 $problem/test.py"
+              ((total_score+=0))
+            fi
+    
+            cd ..
+            ((tested_count++))
+          else
+    
+            echo "$problem 目录未找到 ❗"
+          fi
+    
+          echo ""
+        done
+    
+        echo "已测试题目数: $tested_count/5"
+        echo "总得分: $total_score/100"
+        # 移除 exit 1 强制失败逻辑
+    
+        echo "评分已完成（状态码始终成功）"
