@@ -185,8 +185,8 @@ jobs:
         echo "问题1得分: ${{ steps.p1.outputs.score }}/20"
         echo "问题2得分: ${{ steps.p2.outputs.score }}/20"
         echo "问题3得分: ${{ steps.p3.outputs.score }}/20"
-        echo "问题4得分: ${{ steps.p3.outputs.score }}/20"
-        echo "问题5得分: ${{ steps.p3.outputs.score }}/20"
+        echo "问题4得分: ${{ steps.p4.outputs.score }}/20"
+        echo "问题5得分: ${{ steps.p5.outputs.score }}/20"
 
         echo ""
         echo "总分: $total/100"
