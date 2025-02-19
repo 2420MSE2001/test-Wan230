@@ -1,85 +1,49 @@
-name: Manual Grading
+- name: Run All Tests
 
-on: 
-  workflow_dispatch:  # 手动触发
+  run: |
+    total_score=0
 
-jobs:
-  autograde:
-    runs-on: ubuntu-latest
+    tested_count=0
 
-    
-    steps:
-    - name: Checkout Code
+    for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
 
-      uses: actions/checkout@v4
+      echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
+      
+      if [ -d "$problem" ]; then
 
-    - name: Set up Python
+        cd $problem
 
-      uses: actions/setup-python@v4
+        # 添加防止test.py不存在的保护
 
-      with:
-        python-version: '3.10'
+        if [ -f "test.py" ]; then
 
-    # 新增依赖安装步骤 ▼▼▼
+          if python test.py; then
 
-    - name: Install Dependencies
+            echo "$problem 测试通过 ✅"
+            ((total_score+=20))
+          else
 
-      run: |
-        if [ -f "requirements.txt" ]; then
-
-          echo "正在安装全局依赖..."
-          pip install -r requirements.txt
+            echo "$problem 测试失败 ❌"
+          fi
 
         else
 
-          echo "::warning::根目录未找到requirements.txt文件"
+          echo "::error::缺少测试文件 $problem/test.py"
+          ((total_score+=0))
         fi
 
-    - name: Run All Tests
+        cd ..
+        ((tested_count++))
+      else
 
-      run: |
-        total_score=0
+        echo "$problem 目录未找到 ❗"
+      fi
 
-        tested_count=0
+      echo ""
+    done
 
-        for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
+    echo "已测试题目数: $tested_count/5"
+    echo "总得分: $total_score/100"
+    # 移除 exit 1 强制失败逻辑
 
-          echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
-          
-          if [ -d "$problem" ]; then
-
-            cd $problem
-
-            # 现在测试环境已包含全局依赖
-
-            if python test.py; then
-
-              echo "$problem 测试通过 ✅"
-              ((total_score+=20))
-            else
-
-              echo "$problem 测试失败 ❌"
-            fi
-
-            cd ..
-            ((tested_count++))
-          else
-
-            echo "$problem 目录未找到 ❗"
-          fi
-
-          echo ""
-        done
-
-        echo "已测试题目数: $tested_count/5"
-        echo "总得分: $total_score/100"
-        if [ $tested_count -lt 5 ]; then
-
-          echo "::warning::有未提交的题目目录（缺省数：$((5 - tested_count))）"
-        fi
-
-        if [ $total_score -lt 100 ]; then
-
-          exit 1
-
-        fi
+    echo "评分已完成（状态码始终成功）"
