@@ -42,38 +42,52 @@ jobs:
     
         tested_count=0
     
+        has_errors=0  # 新增错误状态标志
+    
         for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
     
           echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
           
           if [ -d "$problem" ]; then
     
-            cd $problem
-    
-            # 添加防止test.py不存在的保护
-    
+            cd $problem || { echo "::error::进入$problem目录失败"; has_errors=1; continue; }
+            
             if [ -f "test.py" ]; then
     
-              if python test.py; then
+              # 使用set +e防止测试失败中断流程
+    
+              set +e
+    
+              python test.py
+    
+              test_exit=$?
+              set -e
+    
+              
+              if [ $test_exit -eq 0 ]; then
     
                 echo "$problem 测试通过 ✅"
                 ((total_score+=20))
               else
     
                 echo "$problem 测试失败 ❌"
+                has_errors=1  # 标记有错误
+    
               fi
     
             else
     
               echo "::error::缺少测试文件 $problem/test.py"
-              ((total_score+=0))
+              has_errors=1
+    
             fi
     
+            
             cd ..
             ((tested_count++))
           else
     
-            echo "$problem 目录未找到 ❗"
+            echo "::warning::$problem 目录未找到"
           fi
     
           echo ""
@@ -81,6 +95,21 @@ jobs:
     
         echo "已测试题目数: $tested_count/5"
         echo "总得分: $total_score/100"
-        # 移除 exit 1 强制失败逻辑
+        
+        # 根据错误状态决定最终退出码
     
-        echo "评分已完成（状态码始终成功）"
+        if [ $has_errors -eq 1 ]; then
+    
+          echo "::warning::存在未通过的测试或错误"
+          exit 0  # 即使有错误也返回成功状态
+    
+        else
+    
+          echo "所有测试完美通过 🎉"
+          exit 0
+    
+        fi
+            echo "总得分: $total_score/100"
+            # 移除 exit 1 强制失败逻辑
+        
+            echo "评分已完成（状态码始终成功）"
