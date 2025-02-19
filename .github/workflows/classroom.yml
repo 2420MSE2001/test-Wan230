@@ -1,71 +1,85 @@
-name: Autograding Tests
-on:
-  - push
-  - workflow_dispatch
-  - repository_dispatch
-permissions:
-  checks: write
-  actions: read
-  contents: read
-jobs:
-  run-autograding-tests:
-    runs-on: ubuntu-latest
-    if: github.actor != 'github-classroom[bot]'
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      # ========== 全局环境配置 ==========
-    - name: Setup Python
+name: Manual Grading
 
-      uses: actions/setup-python@v5
+on: 
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  autograde:
+    runs-on: ubuntu-latest
+
+    
+    steps:
+    - name: Checkout Code
+
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+
+      uses: actions/setup-python@v4
 
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    # 新增依赖安装步骤 ▼▼▼
 
-      run: pip install -r requirements.txt
+    - name: Install Dependencies
 
-    # ========== 题目测试配置 ==========
-    - name: Problem1 测试
+      run: |
+        if [ -f "requirements.txt" ]; then
 
-      uses: classroom-resources/autograding-io-grader@v1
+          echo "正在安装全局依赖..."
+          pip install -r requirements.txt
 
-      id: problem1
+        else
 
-      with:
-        test-name: "Problem1"
-        command: |
-          cd Problem1
+          echo "::warning::根目录未找到requirements.txt文件"
+        fi
 
-          python -m unittest test.py
+    - name: Run All Tests
 
-        points: 20
+      run: |
+        total_score=0
 
-        timeout: 60
+        tested_count=0
 
-    # ========== 测试结果报告 ==========
+        for problem in Problem1 Problem2 Problem3 Problem4 Problem5; do
 
-      # This is where you place your autograding tests
-      # For more information on this runner, see the documentation at: https://github.com/classroom-resources/autograding-io-grader
-      #
-      # For example, you could run a test suite like this:
-      # - name: Run tests
-      #   uses: classroom-resources/autograding-io-grader@v1
-      #     with:
-      #       test-name: Addition Test
-      #       id: addition-test
-      #       command: "./bin/add.sh"
-      #       input: 1 2
-      #       expected-output: 3
-      #       comparison-method: exact
-      #       timeout: 10
-    - name: Autograding Reporter
-      uses: classroom-resources/autograding-grading-reporter@v1
-      # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
-      # To output the results of the tests, you can use the
-      # autograding-grading-reporter action like this:
-      # env:
-      # ADDITION-TEST_RESULTS: "${{ steps.addition - test.outputs.result }}"
-      #     with:
-      #         runners: addition-test
+          echo "▄▄▄▄▄▄▄ Testing $problem ▄▄▄▄▄▄▄"
+          
+          if [ -d "$problem" ]; then
+
+            cd $problem
+
+            # 现在测试环境已包含全局依赖
+
+            if python test.py; then
+
+              echo "$problem 测试通过 ✅"
+              ((total_score+=20))
+            else
+
+              echo "$problem 测试失败 ❌"
+            fi
+
+            cd ..
+            ((tested_count++))
+          else
+
+            echo "$problem 目录未找到 ❗"
+          fi
+
+          echo ""
+        done
+
+        echo "已测试题目数: $tested_count/5"
+        echo "总得分: $total_score/100"
+        if [ $tested_count -lt 5 ]; then
+
+          echo "::warning::有未提交的题目目录（缺省数：$((5 - tested_count))）"
+        fi
+
+        if [ $total_score -lt 100 ]; then
+
+          exit 1
+
+        fi
