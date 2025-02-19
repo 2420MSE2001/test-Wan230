@@ -1,0 +1,153 @@
+name: Autograding Tests
+on:
+  - push
+  - workflow_dispatch
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      # ========== 全局环境配置 ==========
+    - name: Setup Python
+
+      uses: actions/setup-python@v5
+
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+
+      run: pip install -r requirements.txt
+
+    # ========== 题目测试配置 ==========
+    - name: Problem1 测试
+
+      uses: classroom-resources/autograding-io-grader@v1
+
+      id: problem1
+
+      with:
+        test-name: "Problem1"
+        command: |
+          cd Problem1
+
+          python -m unittest test.py
+
+        points: 20
+
+        timeout: 60
+
+    - name: Problem2 测试
+
+      uses: classroom-resources/autograding-io-grader@v1
+
+      id: problem2
+
+      with:
+        test-name: "Problem2"
+        command: |
+          cd Problem2
+
+          python -m unittest test.py
+
+        points: 20
+
+        timeout: 60
+
+    - name: Problem3 测试
+
+      uses: classroom-resources/autograding-io-grader@v1
+
+      id: problem3
+
+      with:
+        test-name: "Problem3"
+        command: |
+          cd Problem3
+
+          python -m unittest test.py
+
+        points: 20
+
+        timeout: 60
+
+    - name: Problem4 测试
+
+      uses: classroom-resources/autograding-io-grader@v1
+
+      id: problem4
+
+      with:
+        test-name: "Problem4"
+        command: |
+          cd Problem4
+
+          python -m unittest test.py
+
+        points: 20
+
+        timeout: 60
+
+    - name: Problem5 测试
+
+      uses: classroom-resources/autograding-io-grader@v1
+
+      id: problem5
+
+      with:
+        test-name: "Problem5"
+        command: |
+          cd Problem5
+
+          python -m unittest test.py
+
+        points: 20
+
+        timeout: 60
+
+    # ========== 测试结果报告 ==========
+    - name: Autograding Reporter
+
+      uses: classroom-resources/autograding-grading-reporter@v1
+
+      with:
+        runners: |
+          problem1
+
+          problem2
+
+          problem3
+
+          problem4
+
+          problem5
+      # This is where you place your autograding tests
+      # For more information on this runner, see the documentation at: https://github.com/classroom-resources/autograding-io-grader
+      #
+      # For example, you could run a test suite like this:
+      # - name: Run tests
+      #   uses: classroom-resources/autograding-io-grader@v1
+      #     with:
+      #       test-name: Addition Test
+      #       id: addition-test
+      #       command: "./bin/add.sh"
+      #       input: 1 2
+      #       expected-output: 3
+      #       comparison-method: exact
+      #       timeout: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
+      # To output the results of the tests, you can use the
+      # autograding-grading-reporter action like this:
+      # env:
+      # ADDITION-TEST_RESULTS: "${{ steps.addition - test.outputs.result }}"
+      #     with:
+      #         runners: addition-test
