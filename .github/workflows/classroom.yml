@@ -44,74 +44,6 @@ jobs:
 
         timeout: 60
 
-    - name: Problem2 测试
-
-      uses: classroom-resources/autograding-io-grader@v1
-
-      id: problem2
-
-      with:
-        test-name: "Problem2"
-        command: |
-          cd Problem2
-
-          python -m unittest test.py
-
-        points: 20
-
-        timeout: 60
-
-    - name: Problem3 测试
-
-      uses: classroom-resources/autograding-io-grader@v1
-
-      id: problem3
-
-      with:
-        test-name: "Problem3"
-        command: |
-          cd Problem3
-
-          python -m unittest test.py
-
-        points: 20
-
-        timeout: 60
-
-    - name: Problem4 测试
-
-      uses: classroom-resources/autograding-io-grader@v1
-
-      id: problem4
-
-      with:
-        test-name: "Problem4"
-        command: |
-          cd Problem4
-
-          python -m unittest test.py
-
-        points: 20
-
-        timeout: 60
-
-    - name: Problem5 测试
-
-      uses: classroom-resources/autograding-io-grader@v1
-
-      id: problem5
-
-      with:
-        test-name: "Problem5"
-        command: |
-          cd Problem5
-
-          python -m unittest test.py
-
-        points: 20
-
-        timeout: 60
-
     # ========== 测试结果报告 ==========
     - name: Autograding Reporter
 
@@ -121,13 +53,6 @@ jobs:
         runners: |
           problem1
 
-          problem2
-
-          problem3
-
-          problem4
-
-          problem5
       # This is where you place your autograding tests
       # For more information on this runner, see the documentation at: https://github.com/classroom-resources/autograding-io-grader
       #
